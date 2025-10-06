@@ -1,0 +1,43 @@
+pipeline{
+  agent any
+  tools{
+    jdk "jdk17"
+    nodejs "node24"
+  }
+  environment{
+    SONAR_HOME= tool "Sonar"    //SCANNER_HOME= tool "Sonar"
+  }
+  stages{
+    stage("Clean Worksapce"){
+      steps{
+        cleanWs()
+      }
+    }
+    stage("SoanrQube Analysis"){
+      steps{
+        withSonarQubeEnv("Sonar"){
+        sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=prods -Dsonar.projectKey=prods -X
+      }
+    }
+    stage("SonarQube Quality Gate"){
+      steps{
+        script{
+          waitForQualityGate abortPipeline: false , credentialsId: "Sonar"
+        }
+      }
+    }
+     stage("SonarQube Quality Gate"){
+      steps{
+        script{
+          timeout(time: 1,unit: "MINUTES"){
+            waitForQualityGate abortPipeline: false , credentialsId: "Sonar"
+          }
+          
+        }
+      }
+    }
+  }
+    
+  
+  
+}
